@@ -3,14 +3,15 @@ using System.Drawing.Imaging;
 
 namespace TagsCloudVisualization.Renderers;
 
-public class AutoAdjustRenderer(Pen? pen = null) : IRenderer
+public class AutoAdjustRenderer : IRenderer
 {
     private int left;
     private int right;
     private int top;
     private int bottom;
     private readonly List<Rectangle> rectangles = [];
-    private readonly Pen pen = pen ?? new Pen(Color.Black);
+    private readonly Pen pen = new(Color.Black);
+    private readonly Random rand = new();
 
     public void AddRectangle(Rectangle rectangle)
     {
@@ -30,6 +31,7 @@ public class AutoAdjustRenderer(Pen? pen = null) : IRenderer
         var bitmap = new Bitmap(width, height);
         var graphics = Graphics.FromImage(bitmap);
 
+        FillBackground(graphics, width, height);
         DrawRectangles(graphics);
 
         bitmap.Save(filename, ImageFormat.Png);
@@ -43,7 +45,7 @@ public class AutoAdjustRenderer(Pen? pen = null) : IRenderer
         top = 0;
         bottom = 0;
     }
-    
+
     public void AddRectangles(Rectangle[] inputRectangles)
     {
         foreach (var rect in inputRectangles)
@@ -51,11 +53,18 @@ public class AutoAdjustRenderer(Pen? pen = null) : IRenderer
             AddRectangle(rect);
         }
     }
-    
+
+    private static void FillBackground(Graphics graphics, int width, int height)
+    {
+        graphics.FillRectangle(new SolidBrush(Color.Black), 0, 0, width, height);
+    }
+
     private void DrawRectangles(Graphics graphics)
     {
         foreach (var rectangle in rectangles)
         {
+            pen.Color = Color.FromArgb(rand.Next(256), rand.Next(256), rand.Next(256));
+            ;
             var x = rectangle.X + Math.Abs(left);
             var y = rectangle.Y + Math.Abs(top);
             graphics.DrawRectangle(pen, x, y, rectangle.Width, rectangle.Height);

@@ -16,7 +16,7 @@ public class TagCloudApp
 
         var rnd = new Random();
 
-        for (var i = 0; i < 1000; i++)
+        for (var i = 0; i < 100; i++)
         {
             var randomSize = new Size(rnd.Next(10, 100), rnd.Next(10, 100));
             var rect = layout.PutNextRectangle(randomSize);
