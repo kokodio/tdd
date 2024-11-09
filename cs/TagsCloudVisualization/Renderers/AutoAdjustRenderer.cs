@@ -31,7 +31,7 @@ public class AutoAdjustRenderer : IRenderer
         var bitmap = new Bitmap(width, height);
         var graphics = Graphics.FromImage(bitmap);
 
-        FillBackground(graphics, width, height);
+        FillBackground(graphics, width, height, Color.Black);
         DrawRectangles(graphics);
 
         bitmap.Save(filename, ImageFormat.Png);
@@ -54,20 +54,29 @@ public class AutoAdjustRenderer : IRenderer
         }
     }
 
-    private static void FillBackground(Graphics graphics, int width, int height)
+    private void FillBackground(Graphics graphics, int width, int height, Color color)
     {
-        graphics.FillRectangle(new SolidBrush(Color.Black), 0, 0, width, height);
+        graphics.FillRectangle(new SolidBrush(color), 0, 0, width, height);
     }
 
     private void DrawRectangles(Graphics graphics)
     {
         foreach (var rectangle in rectangles)
         {
-            pen.Color = Color.FromArgb(rand.Next(256), rand.Next(256), rand.Next(256));
-            ;
-            var x = rectangle.X + Math.Abs(left);
-            var y = rectangle.Y + Math.Abs(top);
+            SetRandomColor();
+            var x = GetAdjustedCoordinate(rectangle.X, left);
+            var y = GetAdjustedCoordinate(rectangle.Y, top);
             graphics.DrawRectangle(pen, x, y, rectangle.Width, rectangle.Height);
         }
+    }
+    
+    private int GetAdjustedCoordinate(int coordinate, int offset)
+    {
+        return coordinate + Math.Abs(offset);
+    }
+
+    private void SetRandomColor()
+    {
+        pen.Color = Color.FromArgb(rand.Next(256), rand.Next(256), rand.Next(256));
     }
 }

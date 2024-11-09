@@ -4,16 +4,16 @@ namespace TagsCloudVisualization;
 
 public record struct Vertex(Point Location, int Length, Direction Direction)
 {
-    public static IEnumerable<Vertex> GetAllVertices(Rectangle rectangle, Direction direction)
+    public static IEnumerable<Vertex> GetRectangleVertices(Rectangle rectangle, Direction direction)
     {
         for (var i = 0; i < 4; i++)
         {
             direction = DirectionHelper.NextDirection(direction);
-            yield return GetVertex(rectangle, direction);
+            yield return GetRectangleVertex(rectangle, direction);
         }
     }
     
-    public static Vertex GetVertex(Rectangle rectangle, Direction direction)
+    public static Vertex GetRectangleVertex(Rectangle rectangle, Direction direction)
     {
         switch (direction)
         {

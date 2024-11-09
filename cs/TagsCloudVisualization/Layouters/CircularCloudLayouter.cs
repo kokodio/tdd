@@ -58,7 +58,7 @@ public class CircularCloudLayouter : ICloudLayouter
 
     private void UpdatePlaces(Rectangle rectangle, Direction direction)
     {
-        foreach (var value in Vertex.GetAllVertices(rectangle, direction))
+        foreach (var value in Vertex.GetRectangleVertices(rectangle, direction))
         {
             placesQueue.Enqueue(value);
         }
