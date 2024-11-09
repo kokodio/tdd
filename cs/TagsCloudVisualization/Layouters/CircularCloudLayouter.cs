@@ -51,14 +51,14 @@ public class CircularCloudLayouter : ICloudLayouter
 
         UpdatePlaces(guessRectangle, circleDirection);
 
-        circleDirection = NextDirection(circleDirection);
+        circleDirection = DirectionHelper.NextDirection(circleDirection);
 
         return location;
     }
 
     private void UpdatePlaces(Rectangle rectangle, Direction direction)
     {
-        foreach (var value in GetAllVertices(rectangle, direction))
+        foreach (var value in Vertex.GetAllVertices(rectangle, direction))
         {
             placesQueue.Enqueue(value);
         }
@@ -74,67 +74,6 @@ public class CircularCloudLayouter : ICloudLayouter
             Direction.Left => new Point(vertex.Location.X - rectangleSize.Width,
                 vertex.Location.Y - rectangleSize.Height),
             _ => throw new ArgumentException($"Неожиданное значение Direction: {vertex.Direction}")
-        };
-    }
-
-    private IEnumerable<Vertex> GetAllVertices(Rectangle rectangle, Direction direction)
-    {
-        for (var i = 0; i < 4; i++)
-        {
-            direction = NextDirection(direction);
-            yield return GetVertex(rectangle, direction);
-        }
-    }
-
-
-    private static Vertex GetVertex(Rectangle rectangle, Direction direction)
-    {
-        switch (direction)
-        {
-            case Direction.Up:
-                return new Vertex(rectangle.Location, rectangle.Size.Width, Direction.Up);
-            case Direction.Right:
-            {
-                var location = rectangle.Location with { X = rectangle.Location.X + rectangle.Size.Width };
-                return new Vertex(location, rectangle.Size.Height, Direction.Right);
-            }
-            case Direction.Down:
-            {
-                var location = new Point(rectangle.Location.X + rectangle.Size.Width,
-                    rectangle.Location.Y + rectangle.Size.Height);
-                return new Vertex(location, rectangle.Size.Width, Direction.Down);
-            }
-            case Direction.Left:
-            {
-                var location = rectangle.Location with { Y = rectangle.Location.Y + rectangle.Size.Height };
-                return new Vertex(location, rectangle.Size.Height, Direction.Left);
-            }
-            default:
-                throw new ArgumentException($"Неожиданное значение Direction: {direction}");
-        }
-    }
-
-    private static Direction NextDirection(Direction currentDirection)
-    {
-        return currentDirection switch
-        {
-            Direction.Up => Direction.Right,
-            Direction.Right => Direction.Down,
-            Direction.Down => Direction.Left,
-            Direction.Left => Direction.Up,
-            _ => throw new ArgumentException($"Неожиданное значение Direction: {currentDirection}")
-        };
-    }
-
-    private static Direction PreviousDirection(Direction currentDirection)
-    {
-        return currentDirection switch
-        {
-            Direction.Right => Direction.Up,
-            Direction.Down => Direction.Right,
-            Direction.Left => Direction.Down,
-            Direction.Up => Direction.Left,
-            _ => throw new ArgumentException($"Неожиданное значение Direction: {currentDirection}")
         };
     }
 }
