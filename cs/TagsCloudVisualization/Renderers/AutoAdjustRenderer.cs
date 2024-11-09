@@ -28,8 +28,8 @@ public class AutoAdjustRenderer : IRenderer
         var width = Math.Abs(left) + Math.Abs(right) + 1;
         var height = Math.Abs(top) + Math.Abs(bottom) + 1;
 
-        var bitmap = new Bitmap(width, height);
-        var graphics = Graphics.FromImage(bitmap);
+        using var bitmap = new Bitmap(width, height);
+        using var graphics = Graphics.FromImage(bitmap);
 
         FillBackground(graphics, width, height, Color.Black);
         DrawRectangles(graphics);
