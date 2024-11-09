@@ -49,10 +49,7 @@ public class CircularCloudLayouter : ICloudLayouter
             guessRectangle = new Rectangle(location, rectangleSize);
         } while (rectangles.Any(rect => rect.IntersectsWith(guessRectangle)));
 
-        foreach (var value in GetAllVertices(guessRectangle, circleDirection))
-        {
-            placesQueue.Enqueue(value);
-        }
+        UpdatePlaces(guessRectangle, circleDirection);
 
         circleDirection = NextDirection(circleDirection);
 
