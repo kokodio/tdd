@@ -36,18 +36,15 @@ public class CircularCloudLayouter : ICloudLayouter
         var location = Point.Empty;
         var guessRectangle = new Rectangle(location, rectangleSize);
         
-        if (rectangles.Count == 0)
+        if (rectangles.Count != 0)
         {
-            UpdatePlaces(guessRectangle, circleDirection);
-            return Point.Empty;
+            do
+            {
+                var vertex = placesQueue.Dequeue();
+                location = GetLocationOnVertex(vertex, rectangleSize);
+                guessRectangle = new Rectangle(location, rectangleSize);
+            } while (rectangles.Any(rect => rect.IntersectsWith(guessRectangle)));
         }
-        
-        do
-        {
-            var vertex = placesQueue.Dequeue();
-            location = GetLocationOnVertex(vertex, rectangleSize);
-            guessRectangle = new Rectangle(location, rectangleSize);
-        } while (rectangles.Any(rect => rect.IntersectsWith(guessRectangle)));
 
         UpdatePlaces(guessRectangle, circleDirection);
 
