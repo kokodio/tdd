@@ -3,7 +3,7 @@ using System.Drawing.Imaging;
 
 namespace TagsCloudVisualization.Renderers;
 
-public class AutoAdjustRenderer : IRenderer
+public class ContentFittingRenderer : IRenderer
 {
     private int left;
     private int right;

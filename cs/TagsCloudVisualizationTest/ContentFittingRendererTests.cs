@@ -4,13 +4,13 @@ using TagsCloudVisualization.Renderers;
 
 namespace TagsCloudVisualizationTest;
 
-public class AutoAdjustRendererTests
+public class ContentFittingRendererTests
 {
     [TestCase("test.png")]
     [TestCase("render.png")]
     public void SaveImage_CreateFile_WithoutRectangles(string name)
     {
-        var render = new AutoAdjustRenderer();
+        var render = new ContentFittingRenderer();
         
         render.SaveImage(name);
 
@@ -21,7 +21,7 @@ public class AutoAdjustRendererTests
     [TestCase("render.png")]
     public void SaveImage_SizeEqualOne_WithoutRectangles(string name)
     {
-        var render = new AutoAdjustRenderer();
+        var render = new ContentFittingRenderer();
         
         render.SaveImage(name);
         
@@ -35,9 +35,9 @@ public class AutoAdjustRendererTests
     [TestCase("render.png")]
     public void SaveImage_RenderSizeEqualLayouterSize(string name)
     {
+        var render = new ContentFittingRenderer();
         var layout = LayoutRegistry.DefaultLayout();
-        var render = new AutoAdjustRenderer();
-        var rectangles = layout.GetAllRectangles();
+        var rectangles = LayoutRegistry.DefaultLayoutRectangles;
         var left = 0;
         var right = 0;
         var top = 0;
@@ -49,9 +49,11 @@ public class AutoAdjustRendererTests
             right = Math.Max(right, rectangle.Right);
             top = Math.Min(top, rectangle.Top);
             bottom = Math.Max(bottom, rectangle.Bottom);
+            
+            render.AddRectangle(rectangle);
         }
         
-        render.AddRectangles(rectangles);
+        
         render.SaveImage(name);
         
         var width = Math.Abs(left) + Math.Abs(right) + 1;
