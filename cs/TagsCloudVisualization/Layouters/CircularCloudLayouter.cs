@@ -1,18 +1,19 @@
-﻿using System.Drawing;
+﻿using System.Collections.ObjectModel;
+using System.Drawing;
 
 namespace TagsCloudVisualization.Layouters;
 
 public class CircularCloudLayouter : ICloudLayouter
 {
-    private Direction circleDirection = Direction.Up;
+    private Direction currentDirection = Direction.Up;
     private readonly List<Rectangle> rectangles = [];
     private readonly Queue<Vertex> placesQueue = [];
-
+    
     public Rectangle PutNextRectangle(Size rectangleSize)
     {
         if (rectangleSize.Height < 0 || rectangleSize.Width < 0)
         {
-            throw new ArgumentException("Размер меньше 0");
+            throw new ArgumentOutOfRangeException($"{rectangleSize} меньше 0");
         }
         
         var rectangle = new Rectangle(FindNextLocation(rectangleSize), rectangleSize);
@@ -20,15 +21,6 @@ public class CircularCloudLayouter : ICloudLayouter
         rectangles.Add(rectangle);
 
         return rectangle;
-    }
-
-    public Rectangle[] GetAllRectangles() => rectangles.ToArray();
-
-    public void ResetLayout()
-    {
-        rectangles.Clear();
-        placesQueue.Clear();
-        circleDirection = Direction.Up;
     }
 
     private Point FindNextLocation(Size rectangleSize)
@@ -46,9 +38,9 @@ public class CircularCloudLayouter : ICloudLayouter
             } while (rectangles.Any(rect => rect.IntersectsWith(guessRectangle)));
         }
 
-        UpdatePlaces(guessRectangle, circleDirection);
+        UpdatePlaces(guessRectangle, currentDirection);
 
-        circleDirection = DirectionHelper.NextDirection(circleDirection);
+        currentDirection = currentDirection.NextDirection();
 
         return location;
     }
@@ -70,7 +62,7 @@ public class CircularCloudLayouter : ICloudLayouter
             Direction.Down => new Point(vertex.Location.X - rectangleSize.Width, vertex.Location.Y),
             Direction.Left => new Point(vertex.Location.X - rectangleSize.Width,
                 vertex.Location.Y - rectangleSize.Height),
-            _ => throw new ArgumentException($"Неожиданное значение Direction: {vertex.Direction}")
+            _ => throw new ArgumentOutOfRangeException($"Неожиданное значение Direction: {vertex.Direction}")
         };
     }
 }
