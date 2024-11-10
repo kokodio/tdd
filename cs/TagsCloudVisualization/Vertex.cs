@@ -8,7 +8,7 @@ public record struct Vertex(Point Location, int Length, Direction Direction)
     {
         for (var i = 0; i < 4; i++)
         {
-            direction = DirectionHelper.NextDirection(direction);
+            direction = direction.NextDirection();
             yield return GetRectangleVertex(rectangle, direction);
         }
     }
@@ -36,7 +36,7 @@ public record struct Vertex(Point Location, int Length, Direction Direction)
                 return new Vertex(location, rectangle.Size.Height, Direction.Left);
             }
             default:
-                throw new ArgumentException($"Неожиданное значение Direction: {direction}");
+                throw new ArgumentOutOfRangeException($"Неожиданное значение Direction: {direction}");
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿namespace TagsCloudVisualization;
 
-public static class DirectionHelper
+public static class DirectionExtension
 {
-    public static Direction NextDirection(Direction currentDirection)
+    public static Direction NextDirection(this Direction currentDirection)
     {
         return currentDirection switch
         {
@@ -10,11 +10,11 @@ public static class DirectionHelper
             Direction.Right => Direction.Down,
             Direction.Down => Direction.Left,
             Direction.Left => Direction.Up,
-            _ => throw new ArgumentException($"Неожиданное значение Direction: {currentDirection}")
+            _ => throw new ArgumentOutOfRangeException($"Неожиданное значение Direction: {currentDirection}")
         };
     }
 
-    public static Direction PreviousDirection(Direction currentDirection)
+    public static Direction PreviousDirection(this Direction currentDirection)
     {
         return currentDirection switch
         {
@@ -22,7 +22,7 @@ public static class DirectionHelper
             Direction.Down => Direction.Right,
             Direction.Left => Direction.Down,
             Direction.Up => Direction.Left,
-            _ => throw new ArgumentException($"Неожиданное значение Direction: {currentDirection}")
+            _ => throw new ArgumentOutOfRangeException($"Неожиданное значение Direction: {currentDirection}")
         };
     }
 }
