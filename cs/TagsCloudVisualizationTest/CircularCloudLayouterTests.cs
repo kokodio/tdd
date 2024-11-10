@@ -96,7 +96,7 @@ public class CircularCloudLayouterTests
 
         var toleranceValue = maxRadius * 0.15;
 
-        deviationLenght.Should().BeLessThan(toleranceValue);
+        deviationLenght.Should().BeLessThan(toleranceValue, "Прямоугольники слишком сильно отклоненны от центра");
     }
     
     [Test]
@@ -122,7 +122,7 @@ public class CircularCloudLayouterTests
         
         var dense = totalArea / circleArea;
 
-        dense.Should().BeGreaterThan(0.5);
+        dense.Should().BeGreaterThan(0.5, "Плотность слишком низкая");
     }
 
     [Test]
@@ -207,8 +207,8 @@ public class CircularCloudLayouterTests
         var averageCoefficient = outliersDistance / averageDistance;
         var tenPercentCoefficient = outliersDistance / tenPercentDistance;
 
-        averageCoefficient.Should().BeLessThan(1.9);
-        tenPercentCoefficient.Should().BeLessThan(1.2);
+        averageCoefficient.Should().BeLessThan(1.9, "Крайние прямоугольники слишком далеко от остальных");
+        tenPercentCoefficient.Should().BeLessThan(1.2, "Крайние прямоугольники слишком далеко от остальных");
     }
 
     private static double GetDistanceToCenter(Rectangle x)
