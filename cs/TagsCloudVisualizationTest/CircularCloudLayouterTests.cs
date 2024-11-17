@@ -185,6 +185,7 @@ public class CircularCloudLayouterTests
 
         //Процент самых дальних квадратов
         const double outliersPercent = 0.02;
+        const double percentile = 0.95;
         const double tolerance = 0.1;
         var outliersCount = (int)(rectangles.Count * outliersPercent);
 
@@ -192,17 +193,13 @@ public class CircularCloudLayouterTests
             .Select(GetDistanceToCenter)
             .OrderDescending()
             .ToArray();
-
-        var averageDistance = sortedDistance
-            .Skip(outliersCount)
-            .Average();
-
-        //+2σ - должно составлять 95,45% длин до центра
-        var deviation = sortedDistance.StdDev();
-        var maxAllowedDistance = averageDistance + 2 * deviation;
-
+        
+        var percentileValue = sortedDistance
+            .Skip((int)(sortedDistance.Length * (1 - percentile)))
+            .First();
+       
         //умножаем на сколько процентов оно может быть дальше
-        maxAllowedDistance += maxAllowedDistance * tolerance;
+        var maxAllowedDistance = percentileValue * (1 + tolerance);
 
         sortedDistance
             .Take(outliersCount)
