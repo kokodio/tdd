@@ -23,6 +23,20 @@ public class CircularCloudLayouterTests
     {
         layout.PutNextRectangle(Size.Empty).Should().BeEquivalentTo(Rectangle.Empty);
     }
+    
+    [TestCase(100,100)]
+    [TestCase(400,100)]
+    [TestCase(100,400)]
+    [TestCase(0,0)]
+    public void PutNextRectangle_ReturnRectangleCentered_WhenLayoutHaveCenter(int x, int y)
+    {
+        var center = new Point(x, y);
+        layout = new CircularCloudLayouter(center);
+        
+        var expected = new Rectangle(x,y,0,0);
+        
+        layout.PutNextRectangle(Size.Empty).Should().BeEquivalentTo(expected);
+    }
 
     [TestCase(0, 0)]
     [TestCase(5, 5)]
