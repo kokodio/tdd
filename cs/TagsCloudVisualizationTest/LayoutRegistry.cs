@@ -5,21 +5,23 @@ namespace TagsCloudVisualizationTest;
 
 public static class LayoutRegistry
 {
-    private const int DefaultLayoutRectangleCount = 1000;
+    private const int RandomFilledCloudRectangleCount = 1000;
 
-    public static List<Rectangle> DefaultLayoutRectangles = [];
-    
+    public static List<Rectangle> RandomFilledCloudRectangles = [];
+
     private static readonly Random Random = new();
-    public static CircularCloudLayouter DefaultLayout(int sizeFrom = 10, int sizeTo = 100)
+
+    public static CircularCloudLayouter GetRandomFilledCloud(int sizeFrom = 10, int sizeTo = 100)
     {
         var layouter = new CircularCloudLayouter();
-        DefaultLayoutRectangles = new List<Rectangle>(DefaultLayoutRectangleCount);
-        
-        for (var i = 0; i < DefaultLayoutRectangleCount; i++)
+        RandomFilledCloudRectangles = new List<Rectangle>(RandomFilledCloudRectangleCount);
+
+        for (var i = 0; i < RandomFilledCloudRectangleCount; i++)
         {
-            DefaultLayoutRectangles.Add(layouter.PutNextRectangle( new Size(Random.Next(sizeFrom, sizeTo), Random.Next(sizeFrom, sizeTo))));
+            var size = new Size(Random.Next(sizeFrom, sizeTo), Random.Next(sizeFrom, sizeTo));
+            RandomFilledCloudRectangles.Add(layouter.PutNextRectangle(size));
         }
-        
+
         return layouter;
     }
 }
