@@ -36,8 +36,8 @@ public class ContentFittingRendererTests
     public void SaveImage_RenderSizeEqualLayouterSize(string name)
     {
         var render = new ContentFittingRenderer();
-        var layout = LayoutRegistry.DefaultLayout();
-        var rectangles = LayoutRegistry.DefaultLayoutRectangles;
+        var layout = LayoutRegistry.GetRandomFilledCloud();
+        var rectangles = LayoutRegistry.RandomFilledCloudRectangles;
         var left = 0;
         var right = 0;
         var top = 0;

@@ -47,15 +47,15 @@ public class CircularCloudLayouterTests
         var size = new Size(width, height);
 
         var act = () => layout.PutNextRectangle(size);
-        
+
         act.Should().Throw<ArgumentOutOfRangeException>($"{size} меньше 0");
     }
 
     [Test]
     public void IntersectsWith_BeFalse()
     {
-        layout = LayoutRegistry.DefaultLayout();
-        rectangles = LayoutRegistry.DefaultLayoutRectangles;
+        layout = LayoutRegistry.GetRandomFilledCloud();
+        rectangles = LayoutRegistry.RandomFilledCloudRectangles;
 
         var isIntersect = rectangles
             .SelectMany((rect, i) => rectangles.Skip(i + 1).Select(r => (rect, r)))
@@ -68,50 +68,48 @@ public class CircularCloudLayouterTests
     [Repeat(5)]
     public void Layout_BeCircle_WhenDeviationIsLessThanTolerance()
     {
-        layout = LayoutRegistry.DefaultLayout();
-        rectangles = LayoutRegistry.DefaultLayoutRectangles;
+        layout = LayoutRegistry.GetRandomFilledCloud();
+        rectangles = LayoutRegistry.RandomFilledCloudRectangles;
+        
+        const double tolerance = 0.15;
+        
+        var totalArea = rectangles
+            .Sum(rect => rect.Width * rect.Height);
 
-        var totalArea = 0d;
-        var weightedXSum = 0d;
-        var weightedYSum = 0d;
-        var maxRadius = 0d;
+        var weightedXSum = rectangles
+            .Sum(rect => 
+                (rect.X + rect.Width / 2.0) * rect.Width * rect.Height);
 
-        foreach (var rect in rectangles)
-        {
-            maxRadius = Math.Max(maxRadius, GetDistanceToCenter(rect));
-            
-            var centerX = rect.X + rect.Width / 2.0;
-            var centerY = rect.Y + rect.Height / 2.0;
-            var area = rect.Width * rect.Height;
-            
-            weightedXSum += centerX * area;
-            weightedYSum += centerY * area;
-            
-            totalArea += area;
-        }
+        var weightedYSum = rectangles
+            .Sum(rect => 
+                (rect.Y + rect.Height / 2.0) * rect.Width * rect.Height);
+
+        var maxRadius = rectangles.Max(GetDistanceToCenter);
 
         var centerXOfMass = weightedXSum / totalArea;
         var centerYOfMass = weightedYSum / totalArea;
         var deviationLenght = Math.Sqrt(Math.Pow(centerXOfMass, 2) + Math.Pow(centerYOfMass, 2));
 
-        var toleranceValue = maxRadius * 0.15;
+        var maxDeviation = maxRadius * tolerance;
 
-        deviationLenght.Should().BeLessThan(toleranceValue, "Прямоугольники слишком сильно отклоненны от центра");
+        deviationLenght.Should().BeLessThan(maxDeviation, "Прямоугольники слишком сильно отклонены от центра");
     }
-    
+
     [Test]
     [Repeat(5)]
     public void Layout_BeDense()
     {
-        layout = LayoutRegistry.DefaultLayout();
-        rectangles = LayoutRegistry.DefaultLayoutRectangles;
-        
-        var outliersCount = (int)(rectangles.Count * 0.02);
-        
+        layout = LayoutRegistry.GetRandomFilledCloud();
+        rectangles = LayoutRegistry.RandomFilledCloudRectangles;
+
+        //Процент самых дальних квадратов
+        const double outliersPercent = 0.02;
+        var outliersCount = (int)(rectangles.Count * outliersPercent);
+
         var totalArea = rectangles
             .Select(x => x.Height * x.Width)
             .Sum();
-        
+
         var maxRadius = rectangles
             .Select(GetDistanceToCenter)
             .OrderDescending()
@@ -119,7 +117,7 @@ public class CircularCloudLayouterTests
             .First();
 
         var circleArea = Math.PI * Math.Pow(maxRadius, 2);
-        
+
         var dense = totalArea / circleArea;
 
         dense.Should().BeGreaterThan(0.5, "Плотность слишком низкая");
@@ -129,20 +127,22 @@ public class CircularCloudLayouterTests
     [Repeat(5)]
     public void Layout_HasUniformDensityInFourDirections()
     {
-        layout = LayoutRegistry.DefaultLayout();
-        rectangles = LayoutRegistry.DefaultLayoutRectangles;
-        
+        layout = LayoutRegistry.GetRandomFilledCloud();
+        rectangles = LayoutRegistry.RandomFilledCloudRectangles;
+
         const int centerX = 0;
         const int centerY = 0;
+        //Минимальный % от полной площади, который должен быть в "направлении"
+        const double targetPercent = 0.15;
 
-        var quadrants = new Dictionary<string, int>
+        var quadrants = new Dictionary<string, double>
         {
             { "TopRight", 0 },
             { "TopLeft", 0 },
             { "BottomRight", 0 },
             { "BottomLeft", 0 }
         };
-        
+
         foreach (var rect in rectangles)
         {
             var rectCenterX = rect.X + rect.Width / 2.0;
@@ -167,48 +167,49 @@ public class CircularCloudLayouterTests
         }
 
         var totalArea = quadrants.Values.Sum();
-        
-        foreach (var quadrant in quadrants)
-        {
-            var percent = quadrant.Value / (double)totalArea;
+        var targetArea = totalArea * targetPercent;
 
-            percent.Should().BeGreaterThan(0.15, $"Плотность {quadrant.Key} ниже среднего");
-            percent.Should().BeLessThan(0.35, $"Плотность {quadrant.Key} выше среднего");
-        }
+        quadrants
+            .Should()
+            .AllSatisfy(distance => distance.Value
+                .Should()
+                .BeGreaterThan(targetArea, $"Плотность {distance.Key} ниже среднего"));
     }
 
     [Test]
     [Repeat(5)]
     public void Outliers_NotBeFarAway()
     {
-        layout = LayoutRegistry.DefaultLayout();
-        rectangles = LayoutRegistry.DefaultLayoutRectangles;
-        
-        var outliersCount = (int)(rectangles.Count * 0.02);
-        var tenPercent = (int)(rectangles.Count * 0.1);
+        layout = LayoutRegistry.GetRandomFilledCloud();
+        rectangles = LayoutRegistry.RandomFilledCloudRectangles;
+
+        //Процент самых дальних квадратов
+        const double outliersPercent = 0.02;
+        const double tolerance = 0.1;
+        var outliersCount = (int)(rectangles.Count * outliersPercent);
 
         var sortedDistance = rectangles
             .Select(GetDistanceToCenter)
             .OrderDescending()
             .ToArray();
 
-        var outliersDistance = sortedDistance
-            .Take(outliersCount)
-            .Average();
-        
-        var tenPercentDistance = sortedDistance
-            .Take(tenPercent)
-            .Average();
-        
         var averageDistance = sortedDistance
             .Skip(outliersCount)
             .Average();
-        
-        var averageCoefficient = outliersDistance / averageDistance;
-        var tenPercentCoefficient = outliersDistance / tenPercentDistance;
 
-        averageCoefficient.Should().BeLessThan(1.9, "Крайние прямоугольники слишком далеко от остальных");
-        tenPercentCoefficient.Should().BeLessThan(1.2, "Крайние прямоугольники слишком далеко от остальных");
+        //+2σ - должно составлять 95,45% длин до центра
+        var deviation = sortedDistance.StdDev();
+        var maxAllowedDistance = averageDistance + 2 * deviation;
+
+        //умножаем на сколько процентов оно может быть дальше
+        maxAllowedDistance += maxAllowedDistance * tolerance;
+
+        sortedDistance
+            .Take(outliersCount)
+            .Should()
+            .AllSatisfy(distance => distance
+                .Should()
+                .BeLessThan(maxAllowedDistance));
     }
 
     private static double GetDistanceToCenter(Rectangle x)
@@ -223,11 +224,8 @@ public class CircularCloudLayouterTests
 
         var render = new ContentFittingRenderer();
         var name = $"{TestContext.CurrentContext.Test.Name}.png";
-
-        foreach (var rectangle in rectangles)
-        {
-            render.AddRectangle(rectangle);
-        }
+        
+        rectangles.ForEach(render.AddRectangle);
 
         render.SaveImage(name);
         Console.WriteLine($"Tag cloud visualization saved to file {name}");
