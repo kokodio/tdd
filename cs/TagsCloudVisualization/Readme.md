@@ -1,4 +1,4 @@
 ﻿# Примеры изображений
-![plot](../Images/1.png)
-![plot](../Images/2.png)
-![plot](../Images/3.png)
+![plot](../Images/1000.png)
+![plot](../Images/500.png)
+![plot](../Images/100.png)
