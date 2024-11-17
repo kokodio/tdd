@@ -3,11 +3,11 @@ using System.Drawing;
 
 namespace TagsCloudVisualization.Layouters;
 
-public class CircularCloudLayouter : ICloudLayouter
+public class CircularCloudLayouter(Point center = new()) : ICloudLayouter
 {
-    private readonly List<Rectangle> rectangles = [];
     private double angle;
     private double radius;
+    private readonly List<Rectangle> rectangles = [];
     private const double AngleStep = 0.1;
     private const double RadiusStep = 0.1;
 
@@ -24,14 +24,14 @@ public class CircularCloudLayouter : ICloudLayouter
 
         return rectangle;
     }
-    
+
     private Point FindNextLocation(Size rectangleSize)
     {
-        var location = Point.Empty;;
+        var location = center;
         Rectangle guessRectangle;
 
         if (rectangles.Count == 0) return location;
-        
+
         do
         {
             location = GetPointOnSpiral();
@@ -39,15 +39,15 @@ public class CircularCloudLayouter : ICloudLayouter
             radius += RadiusStep;
             angle += AngleStep;
         } while (rectangles.Any(rect => rect.IntersectsWith(guessRectangle)));
-        
+
         return location;
     }
-    
+
     private Point GetPointOnSpiral()
     {
         var (sin, cos) = Math.SinCos(angle);
-        var x = (int)(radius * cos);
-        var y = (int)(radius * sin);
+        var x = (int)(radius * cos) + center.X;
+        var y = (int)(radius * sin) + center.Y;
         return new Point(x, y);
     }
 }
