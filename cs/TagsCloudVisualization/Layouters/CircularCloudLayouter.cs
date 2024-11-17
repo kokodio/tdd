@@ -5,64 +5,49 @@ namespace TagsCloudVisualization.Layouters;
 
 public class CircularCloudLayouter : ICloudLayouter
 {
-    private Direction currentDirection = Direction.Up;
     private readonly List<Rectangle> rectangles = [];
-    private readonly Queue<Vertex> placesQueue = [];
-    
+    private double angle;
+    private double radius;
+    private const double AngleStep = 0.1;
+    private const double RadiusStep = 0.1;
+
     public Rectangle PutNextRectangle(Size rectangleSize)
     {
         if (rectangleSize.Height < 0 || rectangleSize.Width < 0)
         {
             throw new ArgumentOutOfRangeException($"{rectangleSize} меньше 0");
         }
-        
+
         var rectangle = new Rectangle(FindNextLocation(rectangleSize), rectangleSize);
 
         rectangles.Add(rectangle);
 
         return rectangle;
     }
-
+    
     private Point FindNextLocation(Size rectangleSize)
     {
-        var location = Point.Empty;
-        var guessRectangle = new Rectangle(location, rectangleSize);
+        var location = Point.Empty;;
+        Rectangle guessRectangle;
+
+        if (rectangles.Count == 0) return location;
         
-        if (rectangles.Count != 0)
+        do
         {
-            do
-            {
-                var vertex = placesQueue.Dequeue();
-                location = GetLocationOnVertex(vertex, rectangleSize);
-                guessRectangle = new Rectangle(location, rectangleSize);
-            } while (rectangles.Any(rect => rect.IntersectsWith(guessRectangle)));
-        }
-
-        UpdatePlaces(guessRectangle, currentDirection);
-
-        currentDirection = currentDirection.NextDirection();
-
+            location = GetPointOnSpiral();
+            guessRectangle = new Rectangle(location, rectangleSize);
+            radius += RadiusStep;
+            angle += AngleStep;
+        } while (rectangles.Any(rect => rect.IntersectsWith(guessRectangle)));
+        
         return location;
     }
-
-    private void UpdatePlaces(Rectangle rectangle, Direction direction)
+    
+    private Point GetPointOnSpiral()
     {
-        foreach (var value in Vertex.GetRectangleVertices(rectangle, direction))
-        {
-            placesQueue.Enqueue(value);
-        }
-    }
-
-    private Point GetLocationOnVertex(Vertex vertex, Size rectangleSize)
-    {
-        return vertex.Direction switch
-        {
-            Direction.Up => new Point(vertex.Location.X, vertex.Location.Y - rectangleSize.Height),
-            Direction.Right => vertex.Location,
-            Direction.Down => new Point(vertex.Location.X - rectangleSize.Width, vertex.Location.Y),
-            Direction.Left => new Point(vertex.Location.X - rectangleSize.Width,
-                vertex.Location.Y - rectangleSize.Height),
-            _ => throw new ArgumentOutOfRangeException($"Неожиданное значение Direction: {vertex.Direction}")
-        };
+        var (sin, cos) = Math.SinCos(angle);
+        var x = (int)(radius * cos);
+        var y = (int)(radius * sin);
+        return new Point(x, y);
     }
 }
